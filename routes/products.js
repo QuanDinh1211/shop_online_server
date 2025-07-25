@@ -36,8 +36,8 @@ router.get("/", async (req, res) => {
       id: product.id,
       name: product.name,
       description: product.description,
-      price: product.price.toFixed(2), // Định dạng price thành chuỗi với 2 chữ số thập phân
-      image: product.image,
+      price: Math.floor(parseFloat(product.price)), // Định dạng price thành chuỗi với 2 chữ số thập phân
+      image: product.image_url,
       unit: product.unit,
       category: {
         id: product.category_id,
@@ -98,8 +98,8 @@ router.get("/:id", async (req, res) => {
       id: product.id,
       name: product.name,
       description: product.description,
-      price: product.price.toFixed(2), // Định dạng price
-      image: product.image,
+      price: Math.floor(parseFloat(product.price)), // Định dạng price
+      image: product.image_url,
       unit: product.unit,
       category: {
         id: product.category_id,
