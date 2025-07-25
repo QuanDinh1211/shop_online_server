@@ -4,6 +4,14 @@
 CREATE DATABASE IF NOT EXISTS seafood_admin;
 USE seafood_admin;
 
+-- Categories table
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Admins table
 CREATE TABLE admins (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -24,15 +32,19 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Products table
+-- Products table (updated with unit, category_id, inStock)
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
-    image_url VARCHAR(500),
+    image VARCHAR(500),
+    unit VARCHAR(50) NOT NULL,
+    category_id INT NOT NULL,
+    inStock BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
 );
 
 -- Orders table
@@ -61,30 +73,20 @@ CREATE TABLE order_items (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+-- Insert sample categories
+INSERT INTO categories (id, name) VALUES 
+(1, 'Tôm'),
+(2, 'Cua'),
+(3, 'Cá'),
+(4, 'Mực'),
+(5, 'Tôm hùm'),
+(6, 'Sò');
+
 -- Insert sample admin (password: admin123)
-INSERT INTO admins (name, email, password) VALUES 
-('Admin User', 'admin@seafood.com', '$2a$10$rQ7gHkHU8i1VH7YzEq9VduKyNhFJ8QZjKlIHrF3Lz7oX9VH7YzEq9V');
+INSERT INTO admins (id, name, email, password) VALUES 
+(1, 'Admin User', 'admin@seafood.com', '$2a$10$rQ7gHkHU8i1VH7YzEq9VduKyNhFJ8QZjKlIHrF3Lz7oX9VH7YzEq9V');
 
 -- Insert sample products
-INSERT INTO products (name, description, price, image_url) VALUES 
-('Tôm hùm Alaska', 'Tôm hùm tươi nhập khẩu từ Alaska, thịt chắc ngọt', 850000, 'https://images.pexels.com/photos/5840220/pexels-photo-5840220.jpeg'),
-('Cua hoàng đế', 'Cua hoàng đế tươi sống, thịt ngọt và thơm', 1200000, 'https://images.pexels.com/photos/5677799/pexels-photo-5677799.jpeg'),
-('Cá hồi Na Uy', 'Cá hồi tươi nhập khẩu từ Na Uy, giàu omega-3', 450000, 'https://images.pexels.com/photos/3296549/pexels-photo-3296549.jpeg'),
-('Ngao sò điệp', 'Ngao sò điệp tươi sống, thịt ngọt thanh mát', 180000, 'https://images.pexels.com/photos/5677763/pexels-photo-5677763.jpeg');
-
--- Insert sample users
-INSERT INTO users (name, email, password) VALUES 
-('Nguyễn Văn A', 'nguyenvana@email.com', '$2a$10$rQ7gHkHU8i1VH7YzEq9VduKyNhFJ8QZjKlIHrF3Lz7oX9VH7YzEq9V'),
-('Trần Thị B', 'tranthib@email.com', '$2a$10$rQ7gHkHU8i1VH7YzEq9VduKyNhFJ8QZjKlIHrF3Lz7oX9VH7YzEq9V');
-
--- Insert sample orders
-INSERT INTO orders (user_id, name, phone, address, total_amount) VALUES 
-(1, 'Nguyễn Văn A', '0123456789', '123 Đường ABC, Quận 1, TP.HCM', 1300000),
-(2, 'Trần Thị B', '0987654321', '456 Đường XYZ, Quận 3, TP.HCM', 630000);
-
--- Insert sample order items
-INSERT INTO order_items (order_id, product_id, quantity, price) VALUES 
-(1, 1, 1, 850000),
-(1, 3, 1, 450000),
-(2, 2, 1, 450000),
-(2, 4, 1, 180000);
+INSERT INTO products (id, name, description, price, image, unit, category_id, inStock) VALUES 
+(1, 'Tôm hùm Alaska', 'Tôm hùm tươi nhập khẩu từ Alaska, thịt chắc ngọt', 850000, 'https://images.pexels.com/photos/5840220/pexels-photo-5840220.jpeg', 'kg', 5, TRUE),
+(2, 'Cua hoàng đế', 'Cua hoàng đế tươi sống, thịt ngọt và thơm', 1200000, 'https://images.pexels.com/photos/567779
