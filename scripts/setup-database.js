@@ -64,7 +64,7 @@ const setupAdminDatabase = async () => {
       )
     `);
 
-    // Tạo bảng products (cập nhật với category_id, unit, inStock)
+    // Tạo bảng products
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS products (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -81,12 +81,12 @@ const setupAdminDatabase = async () => {
       )
     `);
 
-    // Tạo bảng orders
+    // Tạo bảng orders (sửa lỗi order_code)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS orders (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT,
-        order_code VARCHAR(32 NOT NULL,
+        order_code VARCHAR(32) NOT NULL,
         name VARCHAR(255) NOT NULL,
         phone VARCHAR(20) NOT NULL,
         notes TEXT NULL,
@@ -131,7 +131,7 @@ const setupAdminDatabase = async () => {
       (1, 'Admin User', 'admin@seafood.com', '$2a$10$rQ7gHkHU8i1VH7YzEq9VduKyNhFJ8QZjKlIHrF3Lz7oX9VH7YzEq9V')
     `);
 
-    // Thêm sản phẩm mẫu (cập nhật với category_id, unit, inStock)
+    // Thêm sản phẩm mẫu
     await connection.execute(`
       INSERT IGNORE INTO products (id, name, description, price, image_url, unit, category_id, inStock) VALUES
       (1, 'Tôm hùm Alaska', 'Tôm hùm tươi nhập khẩu từ Alaska, thịt chắc ngọt', 850000, 'https://images.pexels.com/photos/5840220/pexels-photo-5840220.jpeg', 'kg', 5, TRUE),
@@ -148,14 +148,14 @@ const setupAdminDatabase = async () => {
       (2, 'Trần Thị B', 'tranthib@email.com', '$2a$10$rQ7gHkHU8i1VH7YzEq9VduKyNhFJ8QZjKlIHrF3Lz7oX9VH7YzEq9V')
     `);
 
-    // Thêm đơn hàng mẫu
+    // Thêm đơn hàng mẫu (bổ sung order_code, payment_method)
     await connection.execute(`
-      INSERT IGNORE INTO orders (id, user_id, name, phone, address, total_amount) VALUES 
-      (1, 1, 'Nguyễn Văn A', '0123456789', '123 Đường ABC, Quận 1, TP.HCM', 1370000),
-      (2, 2, 'Trần Thị B', '0987654321', '456 Đường XYZ, Quận 3, TP.HCM', 700000)
+      INSERT IGNORE INTO orders (id, user_id, order_code, name, phone, address, total_amount, payment_method) VALUES 
+      (1, 1, 'ORD001', 'Nguyễn Văn A', '0123456789', '123 Đường ABC, Quận 1, TP.HCM', 1370000, 'COD'),
+      (2, 2, 'ORD002', 'Trần Thị B', '0987654321', '456 Đường XYZ, Quận 3, TP.HCM', 700000, 'COD')
     `);
 
-    // Thêm chi tiết đơn hàng (cập nhật để khớp với sản phẩm mới)
+    // Thêm chi tiết đơn hàng
     await connection.execute(`
       INSERT IGNORE INTO order_items (id, order_id, product_id, quantity, price) VALUES 
       (1, 1, 1, 1, 850000),
