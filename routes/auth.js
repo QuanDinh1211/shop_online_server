@@ -1,9 +1,13 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import db from "../config/database.js";
 
 const router = express.Router();
+
+// Lưu tạm mã xác thực (demo, nên dùng Redis hoặc DB thật)
+const resetCodes = {};
 
 // POST /auth/register - Đăng ký tài khoản mới
 router.post("/register", async (req, res) => {
@@ -158,6 +162,83 @@ router.post("/login", async (req, res) => {
       error: "Không thể đăng nhập",
       message: error.message,
     });
+  }
+});
+
+// POST /auth/forgot-password - Gửi mã xác thực quên mật khẩu
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email là bắt buộc" });
+    }
+    const [users] = await db.execute("SELECT id FROM users WHERE email = ?", [
+      email,
+    ]);
+    if (users.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy email" });
+    }
+    // Sinh mã xác thực 6 số
+    const code = crypto.randomInt(100000, 999999).toString();
+    resetCodes[email] = code;
+
+    // Tạo link đổi mật khẩu (FE sẽ nhận link này và render form đổi mật khẩu)
+    const resetLink = `https://your-frontend-domain.com/reset-password?email=${encodeURIComponent(
+      email
+    )}&code=${code}`;
+
+    // Gửi email chứa link
+    await sendMail(
+      email,
+      "Yêu cầu đổi mật khẩu",
+      `<p>Bạn vừa yêu cầu đổi mật khẩu. Nhấn vào link bên dưới để đặt lại mật khẩu:</p>
+      <p><a href="${resetLink}">${resetLink}</a></p>
+      <p>Nếu không phải bạn thực hiện, hãy bỏ qua email này.</p>`
+    );
+
+    res.json({ success: true, message: "Đã gửi link đổi mật khẩu qua email" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi server", error: error.message });
+  }
+});
+
+// POST /auth/reset-password - Đổi mật khẩu bằng mã xác thực
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Thiếu thông tin" });
+    }
+    if (resetCodes[email] !== code) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Mã xác thực không đúng" });
+    }
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Mật khẩu phải >= 6 ký tự" });
+    }
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    await db.execute("UPDATE users SET password = ? WHERE email = ?", [
+      hashedPassword,
+      email,
+    ]);
+    delete resetCodes[email];
+    res.json({ success: true, message: "Đổi mật khẩu thành công" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Lỗi server", error: error.message });
   }
 });
 

@@ -45,6 +45,8 @@ app.get("/", (req, res) => {
       auth: {
         "POST /auth/register": "Đăng ký tài khoản mới",
         "POST /auth/login": "Đăng nhập",
+        "POST /auth/forgot-password": "Gửi mã xác thực quên mật khẩu",
+        "POST /auth/reset-password": "Đổi mật khẩu bằng mã xác thực",
       },
       categories: {
         "GET /categories": "Lấy danh sách danh mục",
@@ -60,7 +62,9 @@ app.get("/", (req, res) => {
         "DELETE /cart/:itemId": "Xóa sản phẩm khỏi giỏ (yêu cầu token)",
       },
       orders: {
-        "POST /orders": "Tạo đơn hàng mới (yêu cầu token)",
+        "POST /orders/direct": "Tạo đơn hàng mới (yêu cầu token)",
+        "GET /orders/get-by-user":
+          "Lấy danh sách đơn hàng của user (yêu cầu token)",
       },
     },
     setup: 'Chạy "npm run setup" để thiết lập database',
