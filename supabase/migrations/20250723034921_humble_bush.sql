@@ -51,6 +51,7 @@ CREATE TABLE products (
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
+    order_code VARCHAR(32) NOT NULL,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     address TEXT NOT NULL,
