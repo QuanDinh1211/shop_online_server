@@ -3,11 +3,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import db from "../config/database.js";
+import dotenv from "dotenv";
+import { sendMail } from "../utils/function.js";
+dotenv.config();
 
 const router = express.Router();
 
 // Lưu tạm mã xác thực (demo, nên dùng Redis hoặc DB thật)
-const resetCodes = {};
+// const resetCodes = {};
 
 // POST /auth/register - Đăng ký tài khoản mới
 router.post("/register", async (req, res) => {
@@ -184,12 +187,20 @@ router.post("/forgot-password", async (req, res) => {
     }
     // Sinh mã xác thực 6 số
     const code = crypto.randomInt(100000, 999999).toString();
-    resetCodes[email] = code;
+
+    // Lưu code vào DB (xóa code cũ nếu có)
+    await db.execute("DELETE FROM password_reset_codes WHERE email = ?", [
+      email,
+    ]);
+    await db.execute(
+      "INSERT INTO password_reset_codes (email, code) VALUES (?, ?)",
+      [email, code]
+    );
 
     // Tạo link đổi mật khẩu (FE sẽ nhận link này và render form đổi mật khẩu)
-    const resetLink = `https://your-frontend-domain.com/reset-password?email=${encodeURIComponent(
-      email
-    )}&code=${code}`;
+    const resetLink = `${
+      process.env.RESET_PASSWORD_URL
+    }?email=${encodeURIComponent(email)}&code=${code}`;
 
     // Gửi email chứa link
     await sendMail(
@@ -217,10 +228,27 @@ router.post("/reset-password", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Thiếu thông tin" });
     }
-    if (resetCodes[email] !== code) {
+    // Kiểm tra code trong DB
+    const [rows] = await db.execute(
+      "SELECT code, created_at FROM password_reset_codes WHERE email = ? ORDER BY created_at DESC LIMIT 1",
+      [email]
+    );
+    if (rows.length === 0 || rows[0].code !== code) {
       return res
         .status(400)
         .json({ success: false, message: "Mã xác thực không đúng" });
+    }
+    // (Tùy chọn) Kiểm tra thời gian hết hạn, ví dụ 15 phút
+    const createdAt = new Date(rows[0].created_at);
+    const now = new Date();
+    if ((now - createdAt) / 1000 > 900) {
+      // 900 giây = 15 phút
+      await db.execute("DELETE FROM password_reset_codes WHERE email = ?", [
+        email,
+      ]);
+      return res
+        .status(400)
+        .json({ success: false, message: "Mã xác thực đã hết hạn" });
     }
     if (newPassword.length < 6) {
       return res
@@ -233,7 +261,9 @@ router.post("/reset-password", async (req, res) => {
       hashedPassword,
       email,
     ]);
-    delete resetCodes[email];
+    await db.execute("DELETE FROM password_reset_codes WHERE email = ?", [
+      email,
+    ]);
     res.json({ success: true, message: "Đổi mật khẩu thành công" });
   } catch (error) {
     res
