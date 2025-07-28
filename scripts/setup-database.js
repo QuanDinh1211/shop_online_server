@@ -88,6 +88,8 @@ const setupAdminDatabase = async () => {
         user_id INT,
         name VARCHAR(255) NOT NULL,
         phone VARCHAR(20) NOT NULL,
+        notes TEXT NULL,
+        payment_method VARCHAR(50) NOT NULL,
         address TEXT NOT NULL,
         total_amount DECIMAL(10, 2) DEFAULT 0,
         status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
