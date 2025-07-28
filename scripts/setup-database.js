@@ -52,6 +52,16 @@ const setupAdminDatabase = async () => {
       )
     `);
 
+    // Tạo bảng password_reset_codes
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS password_reset_codes (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(255) NOT NULL,
+      code VARCHAR(10) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    `);
+
     // Tạo bảng users
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS users (
