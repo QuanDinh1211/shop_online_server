@@ -1,12 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/products');
-const orderRoutes = require('./routes/orders');
-const userRoutes = require('./routes/users');
+const authRoutes = require("./routes/auth");
+const productRoutes = require("./routes/products");
+const categoriesRoutes = require("./routes/categories");
+const unitsRoutes = require("./routes/units");
+const orderRoutes = require("./routes/orders");
+const userRoutes = require("./routes/users");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,34 +19,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/admin', authRoutes);
-app.use('/admin/products', productRoutes);
-app.use('/admin/orders', orderRoutes);
-app.use('/admin/users', userRoutes);
+app.use("/api/admin", authRoutes);
+app.use("/api/admin/products", productRoutes);
+app.use("/api/admin/categories", categoriesRoutes);
+app.use("/api/admin/units", unitsRoutes);
+app.use("/api/admin/orders", orderRoutes);
+app.use("/api/admin/users", userRoutes);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.json({
     success: true,
-    message: 'Seafood Admin API is running',
-    timestamp: new Date().toISOString()
+    message: "Seafood Admin API is running",
+    timestamp: new Date().toISOString(),
   });
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
-    message: 'API endpoint not found'
+    message: "API endpoint not found",
   });
 });
 
 // Global error handler
 app.use((error, req, res, next) => {
-  console.error('Global error:', error);
+  console.error("Global error:", error);
   res.status(500).json({
     success: false,
-    message: 'Internal server error'
+    message: "Internal server error",
   });
 });
 

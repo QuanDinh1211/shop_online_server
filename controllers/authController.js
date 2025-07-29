@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const db = require('../database/connection');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const db = require("../database/connection");
 
 const login = async (req, res) => {
   try {
@@ -10,20 +10,20 @@ const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: "Email and password are required",
       });
     }
 
     // Find admin by email
     const [rows] = await db.execute(
-      'SELECT id, name, email, password FROM admins WHERE email = ?',
+      "SELECT id, name, email, password FROM admins WHERE email = ?",
       [email]
     );
 
     if (rows.length === 0) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       });
     }
 
@@ -31,11 +31,11 @@ const login = async (req, res) => {
 
     // Check password
     const isPasswordValid = await bcrypt.compare(password, admin.password);
-    
+
     if (!isPasswordValid) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       });
     }
 
@@ -48,25 +48,25 @@ const login = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: {
         token,
-        admin: {
+        user: {
           id: admin.id,
           name: admin.name,
-          email: admin.email
-        }
-      }
+          email: admin.email,
+        },
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
 
 module.exports = {
-  login
+  login,
 };
