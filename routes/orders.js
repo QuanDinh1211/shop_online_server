@@ -167,15 +167,16 @@ router.get("/get-by-user", authenticateToken, async (req, res) => {
           p.id as product_id, 
           p.name as product_name, 
           p.price as product_price, 
-          p.image_url as product_image, 
+          p.image as product_image, 
           p.description as product_description, 
-          p.unit as product_unit, 
+          u.name as product_unit, 
           p.inStock as product_in_stock,
           c.id as category_id,
           c.name as category_name
         FROM order_items oi
         JOIN products p ON oi.product_id = p.id
         JOIN categories c ON p.category_id = c.id
+        JOIN units u ON p.unit_id = u.id
         WHERE oi.order_id IN (${orderIds.map(() => "?").join(",")})`,
       orderIds
     );

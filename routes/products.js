@@ -8,9 +8,10 @@ router.get("/", async (req, res) => {
   try {
     const { categoryId } = req.query; // Lấy query parameter categoryId
     let query = `
-      SELECT p.*, c.id as category_id, c.name as category_name
+      SELECT p.*, c.id as category_id, c.name as category_name, u.name AS unit
       FROM products p
       JOIN categories c ON p.category_id = c.id
+      JOIN units u ON p.unit_id = u.id
     `;
     const params = [];
 
@@ -37,7 +38,7 @@ router.get("/", async (req, res) => {
       name: product.name,
       description: product.description,
       price: Math.floor(parseFloat(product.price)), // Định dạng price thành chuỗi với 2 chữ số thập phân
-      image: product.image_url,
+      image: product.image,
       unit: product.unit,
       category: {
         id: product.category_id,
@@ -77,9 +78,10 @@ router.get("/:id", async (req, res) => {
 
     const [products] = await db.execute(
       `
-      SELECT p.*, c.id as category_id, c.name as category_name
+      SELECT p.*, c.id as category_id, c.name as category_name, u.name AS unit
       FROM products p
       JOIN categories c ON p.category_id = c.id
+      JOIN units u ON p.unit_id = u.id
       WHERE p.id = ?
       `,
       [productId]
@@ -99,7 +101,7 @@ router.get("/:id", async (req, res) => {
       name: product.name,
       description: product.description,
       price: Math.floor(parseFloat(product.price)), // Định dạng price
-      image: product.image_url,
+      image: product.image,
       unit: product.unit,
       category: {
         id: product.category_id,
