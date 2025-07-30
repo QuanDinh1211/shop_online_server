@@ -77,10 +77,12 @@ const setupAdminDatabase = async () => {
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        phone VARCHAR(20) NOT NULL,
+        email VARCHAR(255),
+        address TEXT,
+        status ENUM('active', 'inactive') DEFAULT 'active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
 
@@ -114,7 +116,7 @@ const setupAdminDatabase = async () => {
         payment_method VARCHAR(50) NOT NULL,
         address TEXT NOT NULL,
         total_amount DECIMAL(10, 2) DEFAULT 0,
-        status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+        status ENUM('pending', 'confirmed', 'shipping', 'delivered', 'cancelled') DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
@@ -181,8 +183,8 @@ const setupAdminDatabase = async () => {
     // Thêm đơn hàng mẫu
     await connection.execute(`
       INSERT IGNORE INTO orders (id, user_id, order_code, name, phone, address, total_amount, payment_method) VALUES 
-      (1, 1, 'ORD001', 'Nguyễn Văn A', '0123456789', '123 Đường ABC, Quận 1, TP.HCM', 1370000, 'COD'),
-      (2, 2, 'ORD002', 'Trần Thị B', '0987654321', '456 Đường XYZ, Quận 3, TP.HCM', 700000, 'COD')
+      (1, 1, 'ORD001', 'Nguyễn Văn A', '0123456789', '123 Đường ABC, Quận 1, TP.HCM', 1370000, 'cash'),
+      (2, 2, 'ORD002', 'Trần Thị B', '0987654321', '456 Đường XYZ, Quận 3, TP.HCM', 700000, 'cash')
     `);
 
     // Thêm chi tiết đơn hàng

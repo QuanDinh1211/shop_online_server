@@ -8,6 +8,8 @@ const productRoutes = require("./routes/products");
 const categoriesRoutes = require("./routes/categories");
 const unitsRoutes = require("./routes/units");
 const orderRoutes = require("./routes/orders");
+const customersRoutes = require("./routes/customers");
+const dashboardRouter = require("./routes/dashboard");
 const userRoutes = require("./routes/users");
 
 const app = express();
@@ -24,6 +26,8 @@ app.use("/api/admin/products", productRoutes);
 app.use("/api/admin/categories", categoriesRoutes);
 app.use("/api/admin/units", unitsRoutes);
 app.use("/api/admin/orders", orderRoutes);
+app.use("/api/admin/customers", customersRoutes);
+app.use("/api/admin/dashboard", dashboardRouter);
 app.use("/api/admin/users", userRoutes);
 
 // Health check endpoint

@@ -196,7 +196,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       unit_id,
       description || "",
       image || "",
-      inStock === "true" ? true : false, // Chuyển từ string sang boolean
+      inStock ? true : false, // Chuyển từ string sang boolean
       id,
     ]
   );

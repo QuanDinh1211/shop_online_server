@@ -1,10 +1,11 @@
-const express = require('express');
-const authMiddleware = require('../middleware/auth');
+const express = require("express");
+const authMiddleware = require("../middleware/auth");
 const {
   getAllOrders,
   getOrderById,
-  updateOrderStatus
-} = require('../controllers/orderController');
+  updateOrderStatus,
+  exportOrdersToExcel,
+} = require("../controllers/orderController");
 
 const router = express.Router();
 
@@ -12,8 +13,9 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // Order routes
-router.get('/', getAllOrders);
-router.get('/:id', getOrderById);
-router.put('/:id/status', updateOrderStatus);
+router.get("/", getAllOrders);
+router.get("/excel", exportOrdersToExcel);
+router.get("/:id", getOrderById);
+router.put("/:id/status", updateOrderStatus);
 
 module.exports = router;
